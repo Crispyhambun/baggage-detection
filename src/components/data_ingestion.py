@@ -4,14 +4,16 @@ import sys
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-
+from src.utils import visualize_sample
 from src.logger import logging
 from src.exception import Custom_Exception
+# from src.components.model_trainer import model_train
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 class DataIngestionConfig:
-    data_dir = "C:/Users/octav/Downloads/xray_images"
+    data_dir = "D:/Code/ML_projects/baggage_detection/data"
+
     train_images_dir = os.path.join(data_dir, "train", "images")
     train_labels_dir = os.path.join(data_dir, "train", "labels")
     
@@ -29,9 +31,7 @@ class CustomDataset(Dataset):
        
         self.image_files = sorted(os.listdir(images_dir))
         self.label_files = sorted(os.listdir(labels_dir))
-        
-        
-
+                
     def __len__(self):
         return len(self.image_files)
 
@@ -61,6 +61,7 @@ class CustomDataset(Dataset):
         labels = torch.tensor(labels, dtype=torch.int64)
 
         return image, {"boxes": boxes, "labels": labels}
+
 
 class Dataingestion:
     def __init__(self):
@@ -101,6 +102,14 @@ class Dataingestion:
         except Exception as e:
             raise Custom_Exception(e, sys)
 
-# Example usage
+
+
+
+
 data_ingestion = Dataingestion()
 train_loader, valid_loader, test_loader = data_ingestion.initiate_data_ingestion()
+train_dataset = train_loader.dataset
+
+# model_train(train_loader, valid_loader, test_loader)
+
+visualize_sample(train_dataset, index=2)
