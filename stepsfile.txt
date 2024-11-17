@@ -1,2 +1,3 @@
 next - 
 build a model or check how many classes in the labels
+building the train function

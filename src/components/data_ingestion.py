@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 from src.utils import visualize_sample
 from src.logger import logging
 from src.exception import Custom_Exception
-# from src.components.model_trainer import model_train
+from src.components.model_trainer import ModelTrain
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 class DataIngestionConfig:
@@ -39,7 +39,6 @@ class CustomDataset(Dataset):
         image_path = os.path.join(self.images_dir, self.image_files[idx])
         label_path = os.path.join(self.labels_dir, self.label_files[idx])
 
-
         image = Image.open(image_path).convert("RGB")
 
         if self.transform:
@@ -62,18 +61,19 @@ class CustomDataset(Dataset):
 
         return image, {"boxes": boxes, "labels": labels}
 
-
 class Dataingestion:
     def __init__(self):
         self.ingestion_config = DataIngestionConfig()
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.ToTensor()
         ])
 
     def initiate_data_ingestion(self):
         try:
-            logging.info("started Data ingestion")
+            logging.info("Started Data ingestion")
             train_dataset = CustomDataset(
                 images_dir=self.ingestion_config.train_images_dir,
                 labels_dir=self.ingestion_config.train_labels_dir,
@@ -102,14 +102,14 @@ class Dataingestion:
         except Exception as e:
             raise Custom_Exception(e, sys)
 
-
-
-
-
 data_ingestion = Dataingestion()
+
 train_loader, valid_loader, test_loader = data_ingestion.initiate_data_ingestion()
-train_dataset = train_loader.dataset
+trainer = ModelTrain(train_loader, test_loader, valid_loader)
 
-# model_train(train_loader, valid_loader, test_loader)
+# Adjusting the number of epochs and adding learning rate scheduler
+trainer.train_model(20)  # Increased epochs for better training
 
-visualize_sample(train_dataset, index=2)
+trainer.validate_model()
+
+trainer
