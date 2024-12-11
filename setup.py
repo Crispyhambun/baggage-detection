@@ -17,7 +17,7 @@ def get_requirements(file_path: str) -> List[str]:
     return requirements
 
 setup(
-    name="student performance project",
+    name="X-ray baggage detection",
     author="Karan",
     author_email="shinigami709k@gmail.com",
     packages=find_packages(),
